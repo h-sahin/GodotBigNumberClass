@@ -217,26 +217,6 @@ func _init(m: Variant = 1.0, e: int = 0) -> void:
     Big.normalize(self)
 
 
-## Verifies (or converts) an argument into a Big number
-static func _type_check(n) -> Big:
-    if n is Big:
-        return n
-    var result := Big.new(n)
-    return result
-
-
-## Warns if Big number's mantissa exceeds max
-static func _size_check(m: float) -> void:
-    if m > MANTISSA_MAX:
-        printerr(
-            (
-                'Big Error: Mantissa "'
-                + str(m)
-                + '" exceeds MANTISSA_MAX. Use exponent or scientific notation'
-            )
-        )
-
-
 ## [url=https://en.wikipedia.org/wiki/Normalized_number]Normalize[/url] a Big number
 static func normalize(big: Big) -> void:
     # Store sign if negative
@@ -948,70 +928,6 @@ func to_prefix(
             )
 
 
-func _latin_power(european_system) -> int:
-    if european_system:
-        @warning_ignore("integer_division")
-        return int(exponent / 3) / 2
-    @warning_ignore("integer_division")
-    return int(exponent / 3) - 1
-
-
-func _latin_prefix(european_system) -> String:
-    var ones := _latin_power(european_system) % 10
-    var tens := int(_latin_power(european_system) / floor(10)) % 10
-    @warning_ignore("integer_division")
-    var hundreds := int(_latin_power(european_system) / 100) % 10
-    @warning_ignore("integer_division")
-    var millias := int(_latin_power(european_system) / 1000) % 10
-
-    var prefix := ""
-    if _latin_power(european_system) < 10:
-        prefix = (
-            LATIN_SPECIAL[ones]
-            + options.reading_separator
-            + LATIN_TENS[tens]
-            + options.reading_separator
-            + LATIN_HUNDREDS[hundreds]
-        )
-    else:
-        prefix = (
-            LATIN_HUNDREDS[hundreds]
-            + options.reading_separator
-            + LATIN_ONES[ones]
-            + options.reading_separator
-            + LATIN_TENS[tens]
-        )
-
-    for _i in range(millias):
-        prefix = "millia" + options.reading_separator + prefix
-
-    return prefix.lstrip(options.reading_separator).rstrip(
-        options.reading_separator
-    )
-
-
-func _tillion_or_illion(european_system) -> String:
-    if exponent < 6:
-        return ""
-    var powerKilo := _latin_power(european_system) % 1000
-    if powerKilo < 5 and powerKilo > 0 and _latin_power(european_system) < 1000:
-        return ""
-    if (
-        powerKilo >= 7 and powerKilo <= 10
-        or int(powerKilo / floor(10)) % 10 == 1
-    ):
-        return "i"
-    return "ti"
-
-
-func _llion_or_lliard(european_system) -> String:
-    if exponent < 6:
-        return ""
-    if int(exponent / floor(3)) % 2 == 1 and european_system:
-        return "lliard"
-    return "llion"
-
-
 func get_long_name(european_system = false, prefix = "") -> String:
     if exponent < 6:
         return ""
@@ -1128,3 +1044,87 @@ func to_aa(
     )
 
     return prefix + options.suffix_separator + suffix
+
+
+## Verifies (or converts) an argument into a Big number
+static func _type_check(n) -> Big:
+    if n is Big:
+        return n
+    var result := Big.new(n)
+    return result
+
+
+## Warns if Big number's mantissa exceeds max
+static func _size_check(m: float) -> void:
+    if m > MANTISSA_MAX:
+        printerr(
+            (
+                'Big Error: Mantissa "'
+                + str(m)
+                + '" exceeds MANTISSA_MAX. Use exponent or scientific notation'
+            )
+        )
+
+
+func _latin_power(european_system) -> int:
+    if european_system:
+        @warning_ignore("integer_division")
+        return int(exponent / 3) / 2
+    @warning_ignore("integer_division")
+    return int(exponent / 3) - 1
+
+
+func _latin_prefix(european_system) -> String:
+    var ones := _latin_power(european_system) % 10
+    var tens := int(_latin_power(european_system) / floor(10)) % 10
+    @warning_ignore("integer_division")
+    var hundreds := int(_latin_power(european_system) / 100) % 10
+    @warning_ignore("integer_division")
+    var millias := int(_latin_power(european_system) / 1000) % 10
+
+    var prefix := ""
+    if _latin_power(european_system) < 10:
+        prefix = (
+            LATIN_SPECIAL[ones]
+            + options.reading_separator
+            + LATIN_TENS[tens]
+            + options.reading_separator
+            + LATIN_HUNDREDS[hundreds]
+        )
+    else:
+        prefix = (
+            LATIN_HUNDREDS[hundreds]
+            + options.reading_separator
+            + LATIN_ONES[ones]
+            + options.reading_separator
+            + LATIN_TENS[tens]
+        )
+
+    for _i in range(millias):
+        prefix = "millia" + options.reading_separator + prefix
+
+    return prefix.lstrip(options.reading_separator).rstrip(
+        options.reading_separator
+    )
+
+
+func _tillion_or_illion(european_system) -> String:
+    if exponent < 6:
+        return ""
+    var powerKilo := _latin_power(european_system) % 1000
+    if powerKilo < 5 and powerKilo > 0 and _latin_power(european_system) < 1000:
+        return ""
+    if (
+        powerKilo >= 7 and powerKilo <= 10
+        or int(powerKilo / floor(10)) % 10 == 1
+    ):
+        return "i"
+    return "ti"
+
+
+func _llion_or_lliard(european_system) -> String:
+    if exponent < 6:
+        return ""
+    if int(exponent / floor(3)) % 2 == 1 and european_system:
+        return "lliard"
+    return "llion"
