@@ -349,7 +349,7 @@ static func power(x: Big, y) -> Big:
         result.mantissa = y_mantissa * result.mantissa
         Big.normalize(result)
         return result
-    elif typeof(y) == TYPE_FLOAT:
+    if typeof(y) == TYPE_FLOAT:
         if result.mantissa == 0:
             return result
 
@@ -384,11 +384,11 @@ static func power(x: Big, y) -> Big:
             )
 
         return power(x, int(y))
-    else:
-        printerr(
-            "Big Error: Unknown/unsupported data type passed as an exponent in power function!"
-        )
-        return x
+
+    printerr(
+        "Big Error: Unknown/unsupported data type passed as an exponent in power function!"
+    )
+    return x
 
 
 ## Square Roots a given Big number and returns the Big number result
@@ -439,8 +439,7 @@ static func min_value(m, n) -> Big:
     m = Big._type_check(m)
     if m.is_less_than(n):
         return m
-    else:
-        return n
+    return n
 
 
 ## Equivalent of [code]max(Big, Big)[/code]
@@ -448,8 +447,7 @@ static func max_value(m, n) -> Big:
     m = Big._type_check(m)
     if m.is_greater_than(n):
         return m
-    else:
-        return n
+    return n
 
 
 ## Equivalent of [code]Big + n[/code]
@@ -565,15 +563,13 @@ func is_less_than(n) -> bool:
         and n.mantissa == 0
     ):
         return false
+    if exponent > n.exponent:
+        return false
     if exponent < n.exponent:
         return true
-    elif exponent == n.exponent:
-        if mantissa < n.mantissa:
-            return true
-        else:
-            return false
-    else:
-        return false
+    if mantissa < n.mantissa:
+        return true
+    return false
 
 
 ## Equivalent of [code]Big <= n[/code]
@@ -676,13 +672,12 @@ func toString() -> String:
     if mantissa_decimals > exponent:
         if exponent < 248:
             return str(mantissa * 10 ** exponent)
-        else:
-            return to_plain_scientific()
-    else:
-        var mantissa_string := str(mantissa).replace(".", "")
-        for _i in range(exponent - mantissa_decimals):
-            mantissa_string += "0"
-        return mantissa_string
+        return to_plain_scientific()
+
+    var mantissa_string := str(mantissa).replace(".", "")
+    for _i in range(exponent - mantissa_decimals):
+        mantissa_string += "0"
+    return mantissa_string
 
 
 ## Converts the Big Number into a string (in plain Scientific format)
@@ -694,6 +689,8 @@ func to_plain_scientific() -> String:
 func to_scientific(
     no_decimals_on_small_values = false, force_decimals = false
 ) -> String:
+    var split: PackedStringArray
+
     if exponent < 3:
         var decimal_increments: float = (
             1 / (10 ** options.scientific_decimals / 10)
@@ -701,7 +698,7 @@ func to_scientific(
         var value := str(
             snappedf(mantissa * 10 ** exponent, decimal_increments)
         )
-        var split := value.split(".")
+        split = value.split(".")
         if no_decimals_on_small_values:
             return split[0]
         if split.size() > 1:
@@ -723,33 +720,32 @@ func to_scientific(
                     )
                 )
             )
-        else:
-            return value
-    else:
-        var split := str(mantissa).split(".")
-        if split.size() == 1:
-            split.append("")
-        if force_decimals:
-            for i in range(options.scientific_decimals):
-                if split[1].length() < options.scientific_decimals:
-                    split[1] += "0"
-        return (
-            split[0]
-            + options.decimal_separator
-            + split[1].substr(
-                0,
-                min(
-                    options.scientific_decimals,
-                    (
-                        options.dynamic_numbers - 1 - str(exponent).length()
-                        if options.dynamic_decimals
-                        else options.scientific_decimals
-                    )
+        return value
+
+    split = str(mantissa).split(".")
+    if split.size() == 1:
+        split.append("")
+    if force_decimals:
+        for i in range(options.scientific_decimals):
+            if split[1].length() < options.scientific_decimals:
+                split[1] += "0"
+    return (
+        split[0]
+        + options.decimal_separator
+        + split[1].substr(
+            0,
+            min(
+                options.scientific_decimals,
+                (
+                    options.dynamic_numbers - 1 - str(exponent).length()
+                    if options.dynamic_decimals
+                    else options.scientific_decimals
                 )
             )
-            + "e"
-            + str(exponent)
         )
+        + "e"
+        + str(exponent)
+    )
 
 
 ## Converts the Big Number into a string (in Logarithmic format)
@@ -783,8 +779,8 @@ func to_logarithmic(no_decimals_on_small_values = false) -> String:
                     )
                 )
             )
-        else:
-            return value
+        return value
+
     var dec := str(
         snappedf(abs(log(mantissa) / log(10) * 10), decimal_increments)
     )
@@ -853,92 +849,88 @@ func to_prefix(
 
     if no_decimals_on_small_values and exponent < 3:
         return split[0]
-    elif exponent < 3:
+
+    if exponent < 3:
         if options.small_decimals == 0 or split[1] == "":
             return split[0]
-        else:
-            return (
-                split[0]
-                + options.decimal_separator
-                + split[1].substr(
-                    0,
-                    min(
-                        options.small_decimals,
-                        (
-                            options.dynamic_numbers - split[0].length()
-                            if options.dynamic_decimals
-                            else options.small_decimals
-                        )
+        return (
+            split[0]
+            + options.decimal_separator
+            + split[1].substr(
+                0,
+                min(
+                    options.small_decimals,
+                    (
+                        options.dynamic_numbers - split[0].length()
+                        if options.dynamic_decimals
+                        else options.small_decimals
                     )
                 )
             )
-    elif exponent < 6:
+        )
+    if exponent < 6:
         if (
             options.thousand_decimals == 0
             or (split[1] == "" and use_thousand_symbol)
         ):
             return split[0]
-        else:
-            if use_thousand_symbol:  # when the prefix is supposed to be using with a K for thousand
-                for i in range(3):
-                    if split[1].length() < 3:
-                        split[1] += "0"
-                return (
-                    split[0]
-                    + options.decimal_separator
-                    + split[1].substr(
-                        0,
-                        min(
-                            3,
-                            (
-                                options.dynamic_numbers - split[0].length()
-                                if options.dynamic_decimals
-                                else options.thousand_decimals
-                            )
-                        )
-                    )
-                )
-            else:
-                for i in range(3):
-                    if split[1].length() < 3:
-                        split[1] += "0"
-                return (
-                    split[0]
-                    + options.thousand_separator
-                    + split[1].substr(0, min(3, options.thousand_decimals))
-                )
-    else:
-        if options.big_decimals == 0 or split[1] == "":
-            return split[0]
-        else:
+        if use_thousand_symbol:  # when the prefix is supposed to be using with a K for thousand
+            for i in range(3):
+                if split[1].length() < 3:
+                    split[1] += "0"
             return (
                 split[0]
                 + options.decimal_separator
                 + split[1].substr(
                     0,
                     min(
-                        options.big_decimals,
+                        3,
                         (
                             options.dynamic_numbers - split[0].length()
                             if options.dynamic_decimals
-                            else options.big_decimals
+                            else options.thousand_decimals
                         )
                     )
                 )
             )
+        for i in range(3):
+            if split[1].length() < 3:
+                split[1] += "0"
+        return (
+            split[0]
+            + options.thousand_separator
+            + split[1].substr(0, min(3, options.thousand_decimals))
+        )
+
+    if options.big_decimals == 0 or split[1] == "":
+        return split[0]
+    return (
+        split[0]
+        + options.decimal_separator
+        + split[1].substr(
+            0,
+            min(
+                options.big_decimals,
+                (
+                    options.dynamic_numbers - split[0].length()
+                    if options.dynamic_decimals
+                    else options.big_decimals
+                )
+            )
+        )
+    )
 
 
 func get_long_name(european_system = false, prefix = "") -> String:
     if exponent < 6:
         return ""
-    else:
-        return (
-            prefix
-            + _latin_prefix(european_system)
-            + options.reading_separator
-            + _tillion_or_illion(european_system)
-            + _llion_or_lliard(european_system)
-        )
+    return (
+        prefix
+        + _latin_prefix(european_system)
+        + options.reading_separator
+        + _tillion_or_illion(european_system)
+        + _llion_or_lliard(european_system)
+    )
 
 
 ## Converts the Big Number into a string (in American Long Name format)
@@ -962,8 +954,7 @@ func to_long_name(
                 + options.suffix_separator
                 + options.thousand_name
             )
-        else:
-            return to_prefix(no_decimals_on_small_values)
+        return to_prefix(no_decimals_on_small_values)
 
     var suffix = (
         _latin_prefix(european_system)
@@ -986,12 +977,11 @@ func to_metric_symbol(no_decimals_on_small_values = false) -> String:
 
     if not SUFFIXES_METRIC_SYMBOL.has(str(target)):
         return to_scientific()
-    else:
-        return (
-            to_prefix(no_decimals_on_small_values)
-            + options.suffix_separator
-            + SUFFIXES_METRIC_SYMBOL[str(target)]
-        )
+    return (
+        to_prefix(no_decimals_on_small_values)
+        + options.suffix_separator
+        + SUFFIXES_METRIC_SYMBOL[str(target)]
+    )
 
 
 ## Converts the Big Number into a string (in Metric Name format)
@@ -1001,12 +991,11 @@ func to_metric_name(no_decimals_on_small_values = false) -> String:
 
     if not SUFFIXES_METRIC_NAME.has(str(target)):
         return to_scientific()
-    else:
-        return (
-            to_prefix(no_decimals_on_small_values)
-            + options.suffix_separator
-            + SUFFIXES_METRIC_NAME[str(target)]
-        )
+    return (
+        to_prefix(no_decimals_on_small_values)
+        + options.suffix_separator
+        + SUFFIXES_METRIC_NAME[str(target)]
+    )
 
 
 # HACK: This function is wasteful and requires remaking.
