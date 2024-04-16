@@ -119,7 +119,7 @@ var mantissa: float
 ## Big Number Exponent
 var exponent: int
 
-# HACK: This dictionary is inefficient, along with toAA().
+# HACK: This dictionary is inefficient, along with to_aa().
 # Replace with better, ideally utilizing ALPHABET_AA system
 ## AA Suffixes
 ## @deprecated
@@ -213,12 +213,12 @@ func _init(m: Variant = 1.0, e: int = 0) -> void:
             printerr("Big Error: Unknown data type passed as a mantissa!")
         mantissa = m
         exponent = e
-    Big._sizeCheck(mantissa)
+    Big._size_check(mantissa)
     Big.normalize(self)
 
 
 ## Verifies (or converts) an argument into a Big number
-static func _typeCheck(n) -> Big:
+static func _type_check(n) -> Big:
     if n is Big:
         return n
     var result := Big.new(n)
@@ -226,7 +226,7 @@ static func _typeCheck(n) -> Big:
 
 
 ## Warns if Big number's mantissa exceeds max
-static func _sizeCheck(m: float) -> void:
+static func _size_check(m: float) -> void:
     if m > MANTISSA_MAX:
         printerr(
             (
@@ -246,7 +246,7 @@ static func normalize(big: Big) -> void:
         big.mantissa *= -1
 
     if big.mantissa < 1.0 or big.mantissa >= 10.0:
-        var diff: int = floor(log10(big.mantissa))
+        var diff: int = floor(log_10(big.mantissa))
         if diff > -10 and diff < 248:
             var div = 10.0 ** diff
             if div > MANTISSA_PRECISION:
@@ -277,8 +277,8 @@ static func absolute(x) -> Big:
 
 ## Adds two numbers and returns the Big number result [br][br]
 static func add(x, y) -> Big:
-    x = Big._typeCheck(x)
-    y = Big._typeCheck(y)
+    x = Big._type_check(x)
+    y = Big._type_check(y)
     var result := Big.new(x)
 
     var exp_diff: float = y.exponent - x.exponent
@@ -286,7 +286,7 @@ static func add(x, y) -> Big:
     if exp_diff < 248.0:
         var scaled_mantissa: float = y.mantissa * 10 ** exp_diff
         result.mantissa = x.mantissa + scaled_mantissa
-    elif x.isLessThan(y):  # When difference between values is too big, discard the smaller number
+    elif x.is_less_than(y):  # When difference between values is too big, discard the smaller number
         result.mantissa = y.mantissa
         result.exponent = y.exponent
     Big.normalize(result)
@@ -301,8 +301,8 @@ static func subtract(x, y) -> Big:
 
 ## Multiplies two numbers and returns the Big number result
 static func multiply(x, y) -> Big:
-    x = Big._typeCheck(x)
-    y = Big._typeCheck(y)
+    x = Big._type_check(x)
+    y = Big._type_check(y)
     var result := Big.new()
 
     var new_exponent: int = y.exponent + x.exponent
@@ -318,8 +318,8 @@ static func multiply(x, y) -> Big:
 
 ## Divides two numbers and returns the Big number result
 static func divide(x, y) -> Big:
-    x = Big._typeCheck(x)
-    y = Big._typeCheck(y)
+    x = Big._type_check(x)
+    y = Big._type_check(y)
     var result := Big.new(x)
 
     if y.mantissa > -MANTISSA_PRECISION and y.mantissa < MANTISSA_PRECISION:
@@ -391,7 +391,7 @@ static func power(x: Big, y) -> Big:
         # a bit slower, still supports floats
         var newExponent: int = int(temp)
         var residue: float = temp - newExponent
-        newMantissa = 10 ** (y * Big.log10(result.mantissa) + residue)
+        newMantissa = 10 ** (y * Big.log_10(result.mantissa) + residue)
         if newMantissa != INF and newMantissa != -INF:
             result.mantissa = newMantissa
             result.exponent = newExponent
@@ -430,10 +430,10 @@ static func root(x: Big) -> Big:
 ## Modulos a number and returns the Big number result
 static func modulo(x, y) -> Big:
     var result := Big.new(x.mantissa, x.exponent)
-    y = Big._typeCheck(y)
+    y = Big._type_check(y)
     var big = {"mantissa": x.mantissa, "exponent": x.exponent}
     Big.divide(result, y)
-    Big.roundDown(result)
+    Big.round_down(result)
     Big.multiply(result, y)
     Big.subtract(result, big)
     result.mantissa = abs(result.mantissa)
@@ -441,7 +441,7 @@ static func modulo(x, y) -> Big:
 
 
 ## Rounds down a Big number
-static func roundDown(x: Big) -> Big:
+static func round_down(x: Big) -> Big:
     if x.exponent == 0:
         x.mantissa = floor(x.mantissa)
     else:
@@ -455,18 +455,18 @@ static func roundDown(x: Big) -> Big:
 
 
 ## Equivalent of [code]min(Big, Big)[/code]
-static func minValue(m, n) -> Big:
-    m = Big._typeCheck(m)
-    if m.isLessThan(n):
+static func min_value(m, n) -> Big:
+    m = Big._type_check(m)
+    if m.is_less_than(n):
         return m
     else:
         return n
 
 
 ## Equivalent of [code]max(Big, Big)[/code]
-static func maxValue(m, n) -> Big:
-    m = Big._typeCheck(m)
-    if m.isGreaterThan(n):
+static func max_value(m, n) -> Big:
+    m = Big._type_check(m)
+    if m.is_greater_than(n):
         return m
     else:
         return n
@@ -478,7 +478,7 @@ func plus(n) -> Big:
 
 
 ## Equivalent of [code]Big += n[/code]
-func plusEquals(n) -> Big:
+func plus_equals(n) -> Big:
     var new_value = Big.add(self, n)
     mantissa = new_value.mantissa
     exponent = new_value.exponent
@@ -491,7 +491,7 @@ func minus(n) -> Big:
 
 
 ## Equivalent of [code]Big -= n[/code]
-func minusEquals(n) -> Big:
+func minus_equals(n) -> Big:
     var new_value: Big = Big.subtract(self, n)
     mantissa = new_value.mantissa
     exponent = new_value.exponent
@@ -504,7 +504,7 @@ func times(n) -> Big:
 
 
 ## Equivalent of [code]Big *= n[/code]
-func timesEquals(n) -> Big:
+func times_equals(n) -> Big:
     var new_value: Big = Big.multiply(self, n)
     mantissa = new_value.mantissa
     exponent = new_value.exponent
@@ -512,12 +512,12 @@ func timesEquals(n) -> Big:
 
 
 ## Equivalent of [code]Big / n[/code]
-func dividedBy(n) -> Big:
+func divided_by(n) -> Big:
     return Big.divide(self, n)
 
 
 ## Equivalent of [code]Big /= n[/code]
-func dividedByEquals(n) -> Big:
+func divided_by_equals(n) -> Big:
     var new_value: Big = Big.divide(self, n)
     mantissa = new_value.mantissa
     exponent = new_value.exponent
@@ -530,7 +530,7 @@ func mod(n) -> Big:
 
 
 ## Equivalent of [code]Big %= n[/code]
-func modEquals(n) -> Big:
+func mod_equals(n) -> Big:
     var new_value := Big.modulo(self, n)
     mantissa = new_value.mantissa
     exponent = new_value.exponent
@@ -538,12 +538,12 @@ func modEquals(n) -> Big:
 
 
 ## Equivalent of [code]Big ** n[/code]
-func toThePowerOf(n) -> Big:
+func to_the_power_of(n) -> Big:
     return Big.power(self, n)
 
 
 ## Equivalent of [code]Big **= n[/code]
-func toThePowerOfEquals(n) -> Big:
+func to_the_power_of_equals(n) -> Big:
     var new_value: Big = Big.power(self, n)
     mantissa = new_value.mantissa
     exponent = new_value.exponent
@@ -551,7 +551,7 @@ func toThePowerOfEquals(n) -> Big:
 
 
 ## Equivalent of [code]sqrt(Big)[/code]
-func squareRoot() -> Big:
+func square_root() -> Big:
     var new_value := Big.root(self)
     mantissa = new_value.mantissa
     exponent = new_value.exponent
@@ -559,25 +559,25 @@ func squareRoot() -> Big:
 
 
 ## Equivalent of [code]Big == n[/code]
-func isEqualTo(n) -> bool:
-    n = Big._typeCheck(n)
+func is_equal_to(n) -> bool:
+    n = Big._type_check(n)
     Big.normalize(n)
     return n.exponent == exponent and is_equal_approx(n.mantissa, mantissa)
 
 
 ## Equivalent of [code]Big > n[/code]
-func isGreaterThan(n) -> bool:
-    return !isLessThanOrEqualTo(n)
+func is_greater_than(n) -> bool:
+    return !is_less_than_or_equal_to(n)
 
 
 ## Equivalent of [code]Big >== n[/code]
-func isGreaterThanOrEqualTo(n) -> bool:
-    return !isLessThan(n)
+func is_greater_than_or_equal_to(n) -> bool:
+    return !is_less_than(n)
 
 
 ## Equivalent of [code]Big < n[/code]
-func isLessThan(n) -> bool:
-    n = Big._typeCheck(n)
+func is_less_than(n) -> bool:
+    n = Big._type_check(n)
     Big.normalize(n)
     if (
         mantissa == 0
@@ -597,94 +597,94 @@ func isLessThan(n) -> bool:
 
 
 ## Equivalent of [code]Big <= n[/code]
-func isLessThanOrEqualTo(n) -> bool:
-    n = Big._typeCheck(n)
+func is_less_than_or_equal_to(n) -> bool:
+    n = Big._type_check(n)
     Big.normalize(n)
-    if isLessThan(n):
+    if is_less_than(n):
         return true
     if n.exponent == exponent and is_equal_approx(n.mantissa, mantissa):
         return true
     return false
 
 
-static func log10(x) -> float:
+static func log_10(x) -> float:
     return log(x) * 0.4342944819032518
 
 
-func absLog10() -> float:
-    return exponent + Big.log10(abs(mantissa))
+func abs_log_10() -> float:
+    return exponent + Big.log_10(abs(mantissa))
 
 
 func ln() -> float:
-    return 2.302585092994045 * logN(10)
+    return 2.302585092994045 * log_n(10)
 
 
-func logN(base) -> float:
-    return (2.302585092994046 / log(base)) * (exponent + Big.log10(mantissa))
+func log_n(base) -> float:
+    return (2.302585092994046 / log(base)) * (exponent + Big.log_10(mantissa))
 
 
-func pow10(value: int) -> void:
+func pow_10(value: int) -> void:
     mantissa = 10 ** (value % 1)
     exponent = int(value)
 
 
 ## Sets the Thousand name option
-static func setThousandName(name: String) -> void:
+static func set_thousand_name(name: String) -> void:
     options.thousand_name = name
 
 
 ## Sets the Thousand Separator option
-static func setThousandSeparator(separator: String) -> void:
+static func set_thousand_separator(separator: String) -> void:
     options.thousand_separator = separator
 
 
 ## Sets the Decimal Separator option
-static func setDecimalSeparator(separator: String) -> void:
+static func set_decimal_separator(separator: String) -> void:
     options.decimal_separator = separator
 
 
 ## Sets the Suffix Separator option
-static func setSuffixSeparator(separator: String) -> void:
+static func set_suffix_separator(separator: String) -> void:
     options.suffix_separator = separator
 
 
 ## Sets the Reading Separator option
-static func setReadingSeparator(separator: String) -> void:
+static func set_reading_separator(separator: String) -> void:
     options.reading_separator = separator
 
 
 ## Sets the Dynamic Decimals option
-static func setDynamicDecimals(d: bool) -> void:
+static func set_dynamic_decimals(d: bool) -> void:
     options.dynamic_decimals = d
 
 
 ## Sets the Dynamic numbers digits option
-static func setDynamicNumbers(d: int) -> void:
+static func set_dynamic_numbers(d: int) -> void:
     options.dynamic_numbers = d
 
 
 ## Sets the small decimal digits option
-static func setSmallDecimals(d: int) -> void:
+static func set_small_decimals(d: int) -> void:
     options.small_decimals = d
 
 
 ## Sets the thousand decimal digits option
-static func setThousandDecimals(d: int) -> void:
+static func set_thousand_decimals(d: int) -> void:
     options.thousand_decimals = d
 
 
 ## Sets the big decimal digits option
-static func setBigDecimals(d: int) -> void:
+static func set_big_decimals(d: int) -> void:
     options.big_decimals = d
 
 
 ## Sets the scientific notation decimal digits option
-static func setScientificDecimals(d: int) -> void:
+static func set_scientific_decimals(d: int) -> void:
     options.scientific_decimals = d
 
 
 ## Sets the logarithmic notation decimal digits option
-static func setLogarithmicDecimals(d: int) -> void:
+static func set_logarithmic_decimals(d: int) -> void:
     options.logarithmic_decimals = d
 
 
@@ -697,7 +697,7 @@ func toString() -> String:
         if exponent < 248:
             return str(mantissa * 10 ** exponent)
         else:
-            return toPlainScientific()
+            return to_plain_scientific()
     else:
         var mantissa_string := str(mantissa).replace(".", "")
         for _i in range(exponent - mantissa_decimals):
@@ -706,12 +706,12 @@ func toString() -> String:
 
 
 ## Converts the Big Number into a string (in plain Scientific format)
-func toPlainScientific() -> String:
+func to_plain_scientific() -> String:
     return str(mantissa) + "e" + str(exponent)
 
 
 ## Converts the Big Number into a string (in Scientific format)
-func toScientific(
+func to_scientific(
     no_decimals_on_small_values = false, force_decimals = false
 ) -> String:
     if exponent < 3:
@@ -773,7 +773,7 @@ func toScientific(
 
 
 ## Converts the Big Number into a string (in Logarithmic format)
-func toLogarithmic(no_decimals_on_small_values = false) -> String:
+func to_logarithmic(no_decimals_on_small_values = false) -> String:
     var decimal_increments: float = (
         1 / (10 ** options.logarithmic_decimals / 10)
     )
@@ -812,7 +812,7 @@ func toLogarithmic(no_decimals_on_small_values = false) -> String:
     for i in range(options.logarithmic_decimals):
         if dec.length() < options.logarithmic_decimals:
             dec += "0"
-    var formated_exponent := formatExponent(exponent)
+    var formated_exponent := format_exponent(exponent)
     dec = dec.substr(
         0,
         min(
@@ -828,7 +828,7 @@ func toLogarithmic(no_decimals_on_small_values = false) -> String:
 
 
 ## Formats an exponent for string format
-func formatExponent(value) -> String:
+func format_exponent(value) -> String:
     if value < 1000:
         return str(value)
     var string := str(value)
@@ -842,11 +842,11 @@ func formatExponent(value) -> String:
 
 
 ## Converts the Big Number into a float
-func toFloat() -> float:
+func to_float() -> float:
     return snappedf(float(str(mantissa) + "e" + str(exponent)), 0.01)
 
 
-func toPrefix(
+func to_prefix(
     no_decimals_on_small_values = false,
     use_thousand_symbol = true,
     force_decimals = true,
@@ -948,7 +948,7 @@ func toPrefix(
             )
 
 
-func _latinPower(european_system) -> int:
+func _latin_power(european_system) -> int:
     if european_system:
         @warning_ignore("integer_division")
         return int(exponent / 3) / 2
@@ -956,16 +956,16 @@ func _latinPower(european_system) -> int:
     return int(exponent / 3) - 1
 
 
-func _latinPrefix(european_system) -> String:
-    var ones := _latinPower(european_system) % 10
-    var tens := int(_latinPower(european_system) / floor(10)) % 10
+func _latin_prefix(european_system) -> String:
+    var ones := _latin_power(european_system) % 10
+    var tens := int(_latin_power(european_system) / floor(10)) % 10
     @warning_ignore("integer_division")
-    var hundreds := int(_latinPower(european_system) / 100) % 10
+    var hundreds := int(_latin_power(european_system) / 100) % 10
     @warning_ignore("integer_division")
-    var millias := int(_latinPower(european_system) / 1000) % 10
+    var millias := int(_latin_power(european_system) / 1000) % 10
 
     var prefix := ""
-    if _latinPower(european_system) < 10:
+    if _latin_power(european_system) < 10:
         prefix = (
             LATIN_SPECIAL[ones]
             + options.reading_separator
@@ -990,11 +990,11 @@ func _latinPrefix(european_system) -> String:
     )
 
 
-func _tillionOrIllion(european_system) -> String:
+func _tillion_or_illion(european_system) -> String:
     if exponent < 6:
         return ""
-    var powerKilo := _latinPower(european_system) % 1000
-    if powerKilo < 5 and powerKilo > 0 and _latinPower(european_system) < 1000:
+    var powerKilo := _latin_power(european_system) % 1000
+    if powerKilo < 5 and powerKilo > 0 and _latin_power(european_system) < 1000:
         return ""
     if (
         powerKilo >= 7 and powerKilo <= 10
@@ -1004,7 +1004,7 @@ func _tillionOrIllion(european_system) -> String:
     return "ti"
 
 
-func _llionOrLliard(european_system) -> String:
+func _llion_or_lliard(european_system) -> String:
     if exponent < 6:
         return ""
     if int(exponent / floor(3)) % 2 == 1 and european_system:
@@ -1012,82 +1012,82 @@ func _llionOrLliard(european_system) -> String:
     return "llion"
 
 
-func getLongName(european_system = false, prefix = "") -> String:
+func get_long_name(european_system = false, prefix = "") -> String:
     if exponent < 6:
         return ""
     else:
         return (
             prefix
-            + _latinPrefix(european_system)
+            + _latin_prefix(european_system)
             + options.reading_separator
-            + _tillionOrIllion(european_system)
-            + _llionOrLliard(european_system)
+            + _tillion_or_illion(european_system)
+            + _llion_or_lliard(european_system)
         )
 
 
 ## Converts the Big Number into a string (in American Long Name format)
-func toAmericanName(no_decimals_on_small_values = false) -> String:
-    return toLongName(no_decimals_on_small_values, false)
+func to_american_name(no_decimals_on_small_values = false) -> String:
+    return to_long_name(no_decimals_on_small_values, false)
 
 
 ## Converts the Big Number into a string (in European Long Name format)
-func toEuropeanName(no_decimals_on_small_values = false) -> String:
-    return toLongName(no_decimals_on_small_values, true)
+func to_european_name(no_decimals_on_small_values = false) -> String:
+    return to_long_name(no_decimals_on_small_values, true)
 
 
 ## Converts the Big Number into a string (in Latin Long Name format)
-func toLongName(
+func to_long_name(
     no_decimals_on_small_values = false, european_system = false
 ) -> String:
     if exponent < 6:
         if exponent > 2:
             return (
-                toPrefix(no_decimals_on_small_values)
+                to_prefix(no_decimals_on_small_values)
                 + options.suffix_separator
                 + options.thousand_name
             )
         else:
-            return toPrefix(no_decimals_on_small_values)
+            return to_prefix(no_decimals_on_small_values)
 
     var suffix = (
-        _latinPrefix(european_system)
+        _latin_prefix(european_system)
         + options.reading_separator
-        + _tillionOrIllion(european_system)
-        + _llionOrLliard(european_system)
+        + _tillion_or_illion(european_system)
+        + _llion_or_lliard(european_system)
     )
 
     return (
-        toPrefix(no_decimals_on_small_values)
+        to_prefix(no_decimals_on_small_values)
         + options.suffix_separator
         + suffix
     )
 
 
 ## Converts the Big Number into a string (in Metric Symbols format)
-func toMetricSymbol(no_decimals_on_small_values = false) -> String:
+func to_metric_symbol(no_decimals_on_small_values = false) -> String:
     @warning_ignore("integer_division")
     var target := int(exponent / 3)
 
     if not SUFFIXES_METRIC_SYMBOL.has(str(target)):
-        return toScientific()
+        return to_scientific()
     else:
         return (
-            toPrefix(no_decimals_on_small_values)
+            to_prefix(no_decimals_on_small_values)
             + options.suffix_separator
             + SUFFIXES_METRIC_SYMBOL[str(target)]
         )
 
 
 ## Converts the Big Number into a string (in Metric Name format)
-func toMetricName(no_decimals_on_small_values = false) -> String:
+func to_metric_name(no_decimals_on_small_values = false) -> String:
     @warning_ignore("integer_division")
     var target := int(exponent / 3)
 
     if not SUFFIXES_METRIC_NAME.has(str(target)):
-        return toScientific()
+        return to_scientific()
     else:
         return (
-            toPrefix(no_decimals_on_small_values)
+            to_prefix(no_decimals_on_small_values)
             + options.suffix_separator
             + SUFFIXES_METRIC_NAME[str(target)]
         )
@@ -1098,7 +1098,7 @@ func toMetricName(no_decimals_on_small_values = false) -> String:
 # like the other functions
 ## Converts the Big Number into a string (in AA format)
 ## @deprecated
-func toAA(
+func to_aa(
     no_decimals_on_small_values = false,
     use_thousand_symbol = true,
     force_decimals = false
@@ -1123,7 +1123,7 @@ func toAA(
     if not use_thousand_symbol and target == 1:
         suffix = ""
 
-    var prefix = toPrefix(
+    var prefix = to_prefix(
         no_decimals_on_small_values, use_thousand_symbol, force_decimals
     )
 
