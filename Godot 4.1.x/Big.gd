@@ -355,26 +355,26 @@ static func power(x: Big, y) -> Big:
 
         # fast track
         var temp: float = result.exponent * y
-        var newMantissa = result.mantissa ** y
+        var new_mantissa = result.mantissa ** y
         if (
             round(y) == y
             and temp <= INT_MAX
             and temp >= INT_MIN
             and is_finite(temp)
         ):
-            if is_finite(newMantissa):
-                result.mantissa = newMantissa
+            if is_finite(new_mantissa):
+                result.mantissa = new_mantissa
                 result.exponent = int(temp)
                 Big.normalize(result)
                 return result
 
         # a bit slower, still supports floats
-        var newExponent: int = int(temp)
-        var residue: float = temp - newExponent
-        newMantissa = 10 ** (y * Big.log_10(result.mantissa) + residue)
-        if newMantissa != INF and newMantissa != -INF:
-            result.mantissa = newMantissa
-            result.exponent = newExponent
+        var new_exponent: int = int(temp)
+        var residue: float = temp - new_exponent
+        new_mantissa = 10 ** (y * Big.log_10(result.mantissa) + residue)
+        if new_mantissa != INF and new_mantissa != -INF:
+            result.mantissa = new_mantissa
+            result.exponent = new_exponent
             Big.normalize(result)
             return result
 
@@ -1111,12 +1111,16 @@ func _latin_prefix(european_system) -> String:
 func _tillion_or_illion(european_system) -> String:
     if exponent < 6:
         return ""
-    var powerKilo := _latin_power(european_system) % 1000
-    if powerKilo < 5 and powerKilo > 0 and _latin_power(european_system) < 1000:
+    var power_kilo := _latin_power(european_system) % 1000
+    if (
+        power_kilo < 5
+        and power_kilo > 0
+        and _latin_power(european_system) < 1000
+    ):
         return ""
     if (
-        powerKilo >= 7 and powerKilo <= 10
-        or int(powerKilo / floor(10)) % 10 == 1
+        power_kilo >= 7 and power_kilo <= 10
+        or int(power_kilo / floor(10)) % 10 == 1
     ):
         return "i"
     return "ti"
