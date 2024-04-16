@@ -674,6 +674,7 @@ func to_scientific(
     no_decimals_on_small_values = false, force_decimals = false
 ) -> String:
     var split: PackedStringArray
+    var result: String
 
     if exponent < 3:
         var decimal_increments: float = (
@@ -683,16 +684,14 @@ func to_scientific(
             snappedf(mantissa * 10 ** exponent, decimal_increments)
         )
         split = value.split(".")
+        result = split[0]
+
         if no_decimals_on_small_values:
-            return split[0]
+            return result
+
         if split.size() > 1:
-            for i in range(options.logarithmic_decimals):
-                if split[1].length() < options.scientific_decimals:
-                    split[1] += "0"
-            return (
-                split[0]
-                + options.decimal_separator
-                + split[1].substr(
+            split[1] = (
+                (split[1].substr(
                     0,
                     min(
                         options.scientific_decimals,
@@ -702,34 +701,58 @@ func to_scientific(
                             else options.scientific_decimals
                         )
                     )
-                )
+                ))
+                . rstrip("0")
             )
+
+            if force_decimals:
+                for i in range(options.scientific_decimals):
+                    if split[1].length() < options.scientific_decimals:
+                        split[1] += "0"
+
+            if split[1].length() == 0:
+                return result
+
+            result += options.decimal_separator + split[1]
+
+            return result
         return value
 
     split = str(mantissa).split(".")
+    result = split[0]
+    var exponent_string := "e" + str(exponent)
+
     if split.size() == 1:
         split.append("")
+
+    if split[1] != "":
+        split[1] = (
+            split[1]
+            . substr(
+                0,
+                min(
+                    options.scientific_decimals,
+                    (
+                        options.dynamic_numbers - 1 - str(exponent).length()
+                        if options.dynamic_decimals
+                        else options.scientific_decimals
+                    )
+                )
+            )
+            . rstrip("0")
+        )
+
     if force_decimals:
         for i in range(options.scientific_decimals):
             if split[1].length() < options.scientific_decimals:
                 split[1] += "0"
-    return (
-        split[0]
-        + options.decimal_separator
-        + split[1].substr(
-            0,
-            min(
-                options.scientific_decimals,
-                (
-                    options.dynamic_numbers - 1 - str(exponent).length()
-                    if options.dynamic_decimals
-                    else options.scientific_decimals
-                )
-            )
-        )
-        + "e"
-        + str(exponent)
-    )
+
+    if split[1].length() == 0:
+        result += exponent_string
+    else:
+        result += options.decimal_separator + split[1] + exponent_string
+
+    return result
 
 
 ## Converts the Big Number into a string (in Logarithmic format)
