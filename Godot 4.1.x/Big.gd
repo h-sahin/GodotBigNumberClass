@@ -664,22 +664,6 @@ static func set_logarithmic_decimals(d: int) -> void:
     options.logarithmic_decimals = d
 
 
-## Converts the Big Number into a string
-func toString() -> String:
-    var mantissa_decimals := 0
-    if str(mantissa).find(".") >= 0:
-        mantissa_decimals = str(mantissa).split(".")[1].length()
-    if mantissa_decimals > exponent:
-        if exponent < 248:
-            return str(mantissa * 10 ** exponent)
-        return to_plain_scientific()
-
-    var mantissa_string := str(mantissa).replace(".", "")
-    for _i in range(exponent - mantissa_decimals):
-        mantissa_string += "0"
-    return mantissa_string
-
-
 ## Converts the Big Number into a string (in plain Scientific format)
 func to_plain_scientific() -> String:
     return str(mantissa) + "e" + str(exponent)
@@ -1053,6 +1037,22 @@ static func _size_check(m: float) -> void:
                 + '" exceeds MANTISSA_MAX. Use exponent or scientific notation'
             )
         )
+
+
+## Converts the Big Number into a string
+func _to_string() -> String:
+    var mantissa_decimals := 0
+    if str(mantissa).find(".") >= 0:
+        mantissa_decimals = str(mantissa).split(".")[1].length()
+    if mantissa_decimals > exponent:
+        if exponent < 248:
+            return str(mantissa * 10 ** exponent)
+        return to_plain_scientific()
+
+    var mantissa_string := str(mantissa).replace(".", "")
+    for _i in range(exponent - mantissa_decimals):
+        mantissa_string += "0"
+    return mantissa_string
 
 
 func _latin_power(european_system) -> int:
