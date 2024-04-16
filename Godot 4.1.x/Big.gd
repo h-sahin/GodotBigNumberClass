@@ -11,13 +11,18 @@ extends RefCounted
 ## Long strings like 4200000000 or 13370000000000000000000000000000[br][br]
 ## Please note that this class has limited precision and does not fully support negative exponents[br]
 
-## Big Number Mantissa
-var mantissa: float
-## Big Number Exponent
-var exponent: int
+## Maximum Big Number Mantissa
+const MANTISSA_MAX: float = 1209600.0
+## Big Number Mantissa floating-point precision
+const MANTISSA_PRECISION: float = 0.0000001
+
+## int (signed 64-bit) minimum value
+const INT_MIN: int = -9223372036854775808
+## int (signed 64-bit) maximum value
+const INT_MAX: int = 9223372036854775807
 
 ## Metric Symbol Suffixes
-const suffixes_metric_symbol: Dictionary = {
+const SUFFIXES_METRIC_SYMBOL: Dictionary = {
     "0": "",
     "1": "k",
     "2": "M",
@@ -31,7 +36,7 @@ const suffixes_metric_symbol: Dictionary = {
     "10": "Q",
 }
 ## Metric Name Suffixes
-const suffixes_metric_name: Dictionary = {
+const SUFFIXES_METRIC_NAME: Dictionary = {
     "0": "",
     "1": "kilo",
     "2": "mega",
@@ -44,9 +49,78 @@ const suffixes_metric_name: Dictionary = {
     "9": "ronna",
     "10": "quetta",
 }
+## AA Alphabet
+const ALPHABET_AA: Array[String] = [
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f",
+    "g",
+    "h",
+    "i",
+    "j",
+    "k",
+    "l",
+    "m",
+    "n",
+    "o",
+    "p",
+    "q",
+    "r",
+    "s",
+    "t",
+    "u",
+    "v",
+    "w",
+    "x",
+    "y",
+    "z"
+]
+
+## Latin Ones Prefixes
+const LATIN_ONES: Array[String] = [
+    "", "un", "duo", "tre", "quattuor", "quin", "sex", "septen", "octo", "novem"
+]
+## Latin Tens Prefixes
+const LATIN_TENS: Array[String] = [
+    "",
+    "dec",
+    "vigin",
+    "trigin",
+    "quadragin",
+    "quinquagin",
+    "sexagin",
+    "septuagin",
+    "octogin",
+    "nonagin"
+]
+## Latin Hundreds Prefixes
+const LATIN_HUNDREDS: Array[String] = [
+    "",
+    "cen",
+    "duocen",
+    "trecen",
+    "quadringen",
+    "quingen",
+    "sescen",
+    "septingen",
+    "octingen",
+    "nongen"
+]
+## Latin Special Prefixes
+const LATIN_SPECIAL: Array[String] = [
+    "", "mi", "bi", "tri", "quadri", "quin", "sex", "sept", "oct", "non"
+]
+
+## Big Number Mantissa
+var mantissa: float
+## Big Number Exponent
+var exponent: int
 
 # HACK: This dictionary is inefficient, along with toAA().
-# Replace with better, ideally utilizing alphabet_aa system
+# Replace with better, ideally utilizing ALPHABET_AA system
 ## AA Suffixes
 ## @deprecated
 static var suffixes_aa: Dictionary = {
@@ -109,72 +183,6 @@ static var suffixes_aa: Dictionary = {
     "56": "bz",
     "57": "ca"
 }
-
-## AA Alphabet
-const alphabet_aa: Array[String] = [
-    "a",
-    "b",
-    "c",
-    "d",
-    "e",
-    "f",
-    "g",
-    "h",
-    "i",
-    "j",
-    "k",
-    "l",
-    "m",
-    "n",
-    "o",
-    "p",
-    "q",
-    "r",
-    "s",
-    "t",
-    "u",
-    "v",
-    "w",
-    "x",
-    "y",
-    "z"
-]
-
-## Latin Ones Prefixes
-const latin_ones: Array[String] = [
-    "", "un", "duo", "tre", "quattuor", "quin", "sex", "septen", "octo", "novem"
-]
-## Latin Tens Prefixes
-const latin_tens: Array[String] = [
-    "",
-    "dec",
-    "vigin",
-    "trigin",
-    "quadragin",
-    "quinquagin",
-    "sexagin",
-    "septuagin",
-    "octogin",
-    "nonagin"
-]
-## Latin Hundreds Prefixes
-const latin_hundreds: Array[String] = [
-    "",
-    "cen",
-    "duocen",
-    "trecen",
-    "quadringen",
-    "quingen",
-    "sescen",
-    "septingen",
-    "octingen",
-    "nongen"
-]
-## Latin Special Prefixes
-const latin_special: Array[String] = [
-    "", "mi", "bi", "tri", "quadri", "quin", "sex", "sept", "oct", "non"
-]
-
 ## Various options to control the string presentation of Big Numbers
 static var options = {
     "dynamic_decimals": false,
@@ -190,16 +198,6 @@ static var options = {
     "reading_separator": "",
     "thousand_name": "thousand"
 }
-
-## Maximum Big Number Mantissa
-const MANTISSA_MAX: float = 1209600.0
-## Big Number Mantissa floating-point precision
-const MANTISSA_PRECISION: float = 0.0000001
-
-## int (signed 64-bit) minimum value
-const INT_MIN: int = -9223372036854775808
-## int (signed 64-bit) maximum value
-const INT_MAX: int = 9223372036854775807
 
 
 func _init(m: Variant = 1.0, e: int = 0) -> void:
@@ -969,19 +967,19 @@ func _latinPrefix(european_system) -> String:
     var prefix := ""
     if _latinPower(european_system) < 10:
         prefix = (
-            latin_special[ones]
+            LATIN_SPECIAL[ones]
             + options.reading_separator
-            + latin_tens[tens]
+            + LATIN_TENS[tens]
             + options.reading_separator
-            + latin_hundreds[hundreds]
+            + LATIN_HUNDREDS[hundreds]
         )
     else:
         prefix = (
-            latin_hundreds[hundreds]
+            LATIN_HUNDREDS[hundreds]
             + options.reading_separator
-            + latin_ones[ones]
+            + LATIN_ONES[ones]
             + options.reading_separator
-            + latin_tens[tens]
+            + LATIN_TENS[tens]
         )
 
     for _i in range(millias):
@@ -1070,13 +1068,13 @@ func toMetricSymbol(no_decimals_on_small_values = false) -> String:
     @warning_ignore("integer_division")
     var target := int(exponent / 3)
 
-    if not suffixes_metric_symbol.has(str(target)):
+    if not SUFFIXES_METRIC_SYMBOL.has(str(target)):
         return toScientific()
     else:
         return (
             toPrefix(no_decimals_on_small_values)
             + options.suffix_separator
-            + suffixes_metric_symbol[str(target)]
+            + SUFFIXES_METRIC_SYMBOL[str(target)]
         )
 
 
@@ -1085,13 +1083,13 @@ func toMetricName(no_decimals_on_small_values = false) -> String:
     @warning_ignore("integer_division")
     var target := int(exponent / 3)
 
-    if not suffixes_metric_name.has(str(target)):
+    if not SUFFIXES_METRIC_NAME.has(str(target)):
         return toScientific()
     else:
         return (
             toPrefix(no_decimals_on_small_values)
             + options.suffix_separator
-            + suffixes_metric_name[str(target)]
+            + SUFFIXES_METRIC_NAME[str(target)]
         )
 
 
@@ -1112,11 +1110,11 @@ func toAA(
 
     if not suffixes_aa.has(aa_index):
         var offset := target + 22
-        var base := alphabet_aa.size()
+        var base := ALPHABET_AA.size()
         while offset > 0:
             offset -= 1
             var digit := offset % base
-            suffix = alphabet_aa[digit] + suffix
+            suffix = ALPHABET_AA[digit] + suffix
             offset /= base
         suffixes_aa[aa_index] = suffix
     else:
