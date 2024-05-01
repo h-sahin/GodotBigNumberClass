@@ -12,17 +12,17 @@ extends RefCounted
 ## Please note that this class has limited precision and does not fully support negative exponents[br]
 
 ## Maximum Big Number Mantissa
-const MANTISSA_MAX: float = 1209600.0
+const MANTISSA_MAX := 1209600.0
 ## Big Number Mantissa floating-point precision
-const MANTISSA_PRECISION: float = 0.0000001
+const MANTISSA_PRECISION := 0.0000001
 
 ## int (signed 64-bit) minimum value
-const INT_MIN: int = -9223372036854775808
+const INT_MIN := -9223372036854775808
 ## int (signed 64-bit) maximum value
-const INT_MAX: int = 9223372036854775807
+const INT_MAX := 9223372036854775807
 
 ## Metric Symbol Suffixes
-const SUFFIXES_METRIC_SYMBOL: Dictionary = {
+const SUFFIXES_METRIC_SYMBOL := {
     "0": "",
     "1": "k",
     "2": "M",
@@ -36,7 +36,7 @@ const SUFFIXES_METRIC_SYMBOL: Dictionary = {
     "10": "Q",
 }
 ## Metric Name Suffixes
-const SUFFIXES_METRIC_NAME: Dictionary = {
+const SUFFIXES_METRIC_NAME := {
     "0": "",
     "1": "kilo",
     "2": "mega",
@@ -50,7 +50,7 @@ const SUFFIXES_METRIC_NAME: Dictionary = {
     "10": "quetta",
 }
 ## AA Alphabet
-const ALPHABET_AA: Array[String] = [
+const ALPHABET_AA := [
     "a",
     "b",
     "c",
@@ -80,11 +80,11 @@ const ALPHABET_AA: Array[String] = [
 ]
 
 ## Latin Ones Prefixes
-const LATIN_ONES: Array[String] = [
+const LATIN_ONES := [
     "", "un", "duo", "tre", "quattuor", "quin", "sex", "septen", "octo", "novem"
 ]
 ## Latin Tens Prefixes
-const LATIN_TENS: Array[String] = [
+const LATIN_TENS := [
     "",
     "dec",
     "vigin",
@@ -97,7 +97,7 @@ const LATIN_TENS: Array[String] = [
     "nonagin"
 ]
 ## Latin Hundreds Prefixes
-const LATIN_HUNDREDS: Array[String] = [
+const LATIN_HUNDREDS := [
     "",
     "cen",
     "duocen",
@@ -110,7 +110,7 @@ const LATIN_HUNDREDS: Array[String] = [
     "nongen"
 ]
 ## Latin Special Prefixes
-const LATIN_SPECIAL: Array[String] = [
+const LATIN_SPECIAL := [
     "", "mi", "bi", "tri", "quadri", "quin", "sex", "sept", "oct", "non"
 ]
 
@@ -123,7 +123,7 @@ var exponent: int
 # Replace with better, ideally utilizing ALPHABET_AA system
 ## AA Suffixes
 ## @deprecated
-static var suffixes_aa: Dictionary = {
+static var suffixes_aa := {
     "0": "",
     "1": "k",
     "2": "m",
@@ -184,7 +184,7 @@ static var suffixes_aa: Dictionary = {
     "57": "ca"
 }
 ## Various options to control the string presentation of Big Numbers
-static var options = {
+static var options := {
     "dynamic_decimals": false,
     "dynamic_numbers": 4,
     "small_decimals": 3,
